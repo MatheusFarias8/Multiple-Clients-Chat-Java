@@ -1,4 +1,5 @@
 import javax.imageio.IIOException;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -26,7 +27,7 @@ public class Server {
 
             }
 
-        } catch (IIOException e) {
+        } catch (IOException e) {
 
         }
 
@@ -41,7 +42,7 @@ public class Server {
 
             }
 
-        } catch (IIOException e) {
+        } catch (IOException e) {
 
             e.printStackTrace();
 
@@ -51,7 +52,7 @@ public class Server {
     public static void main(String[] args) throws IIOException{
 
         int port = 1234;
-        ServerSocket serverSocket = new ServerSocke(port);
+        ServerSocket serverSocket = new ServerSocket(port);
         Server server = new Server(serverSocket);
         server.startServer();
 
