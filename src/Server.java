@@ -34,11 +34,17 @@ public class Server {
 
     public void closeServerSocket() {
         try {
+
             if (serverSocket != null) {
+
                 serverSocket.close();
+
             }
+
         } catch (IIOException e) {
+
             e.printStackTrace();
+
         }
     }
 
