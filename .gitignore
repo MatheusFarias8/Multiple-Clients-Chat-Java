@@ -27,3 +27,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+Client$1.class
+Client.class
+ClientHandler.class
+Server.class

@@ -1,4 +1,3 @@
-import javax.imageio.IIOException;
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -27,6 +26,8 @@ public class Client {
 
     }
 
+    private volatile boolean running = true;
+
     public void sendMessage() {
 
         try {
@@ -37,9 +38,24 @@ public class Client {
 
             Scanner scanner = new Scanner(System.in);
 
-            while (socket.isConnected()) {
+            while (running) {
 
+                System.out.print(username + ": ");
                 String messageToSend = scanner.nextLine();
+
+                if (messageToSend.trim().isEmpty()) {
+                    continue;
+                }
+
+                if (messageToSend.equalsIgnoreCase("/exit")) {
+                    running = false;
+                    bufferedWriter.write(username + " saiu do chat.");
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                }
+
                 bufferedWriter.write(username + ": " + messageToSend);
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
@@ -54,30 +70,39 @@ public class Client {
 
     }
 
+
     public void listenForMessage() {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                String msgFromGroupChat;
+            String msgFromGroupChat;
 
-                while (socket.isConnected()) {
+            while (running) {
 
-                    try {
+                try {
 
-                        msgFromGroupChat = bufferedReader.readLine();
-                        System.out.println(msgFromGroupChat);
+                    msgFromGroupChat = bufferedReader.readLine();
 
-                    } catch (IOException e) {
-
+                    if (msgFromGroupChat == null) {
+                        System.out.println("Servidor desconectado.");
                         closeEverything(socket, bufferedReader, bufferedWriter);
-
+                        break;
                     }
 
+                    System.out.println("\n" + msgFromGroupChat);
+
+                    System.out.print(username + ": ");
+
+                } catch (IOException e) {
+
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    break;
                 }
 
             }
+            closeEverything(socket, bufferedReader, bufferedWriter);
+            System.exit(0);
+
         }).start();
 
     }
@@ -86,23 +111,10 @@ public class Client {
 
         try {
 
-            if (bufferedReader != null) {
-
-                bufferedReader.close();
-
-            }
-
-            if (bufferedWriter != null) {
-
-                bufferedWriter.close();
-
-            }
-
-            if (socket != null) {
-
-                socket.close();
-
-            }
+            if (bufferedReader != null) bufferedReader.close();
+            if (bufferedWriter != null) bufferedWriter.close();
+            if (socket != null) socket.close();
+            System.exit(0);
 
         } catch (IOException e) {
 
@@ -114,15 +126,23 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
 
+        System.out.println("-=-=-=-= GROUP CHAT -=-=-=-=-");
+        System.out.println();
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter your username: ");
         String username = scanner.nextLine();
 
+        System.out.println("\n Bem-vindo ao chat, " + username + "!");
+        System.out.println("Digite suas mensagens e pressione Enter para enviar.");
+        System.out.println("Digite /exit para sair do chat.");
+        System.out.println("---------------------------------\n");
+
         String ip = "localhost";
         int port = 1234;
         Socket socket = new Socket(ip, port);
-        Client client = new Client(socket, username);
 
+        Client client = new Client(socket, username);
         client.listenForMessage();
         client.sendMessage();
 

@@ -1,4 +1,3 @@
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,6 +28,8 @@ public class Server {
 
         } catch (IOException e) {
 
+            e.printStackTrace();
+
         }
 
     }
@@ -36,11 +37,8 @@ public class Server {
     public void closeServerSocket() {
         try {
 
-            if (serverSocket != null) {
+            if (serverSocket != null) serverSocket.close();
 
-                serverSocket.close();
-
-            }
 
         } catch (IOException e) {
 
@@ -49,11 +47,13 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) throws IIOException{
+    public static void main(String[] args) throws IOException{
 
         int port = 1234;
         ServerSocket serverSocket = new ServerSocket(port);
         Server server = new Server(serverSocket);
+        System.out.println("Server started in Port: " + port);
+        System.out.println("Listening...");
         server.startServer();
 
     }
